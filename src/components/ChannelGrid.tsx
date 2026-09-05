@@ -1,6 +1,6 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search, Star, Tv } from 'lucide-react';
-import { memo, useDeferredValue, useMemo, useRef, useState } from 'react';
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import type { Channel } from '../types';
 
 interface Props {
@@ -68,21 +68,36 @@ export default function ChannelGrid(p: Props) {
   }, [p.channels, deferred, group, favOnly, p.favorites]);
 
   const isGrid = view === 'grid';
-  const cols = isGrid ? 2 : 1;
+  // Columns follow the measured container width (viewport breakpoints lie:
+  // the library is a fraction of the window). Chunking always matches the
+  // rendered column count so virtual rows never overlap or gap.
+  const [colCount, setColCount] = useState(3);
+  useEffect(() => {
+    const el = parentRef.current;
+    if (!el) return;
+    const update = () => setColCount(el.clientWidth < 560 ? 2 : 3);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Fixed row geometry: thumb 144 + footer 64 + gap 12 = 220 grid;
+  // list row 60 + gap 12 = 72. Exact estimates => zero overlap at any width.
+  const GRID_ROW = 220;
+  const LIST_ROW = 72;
 
   const rows = useMemo(() => {
     if (!isGrid) return filtered.map((c) => [c]);
     const out: Channel[][] = [];
-    // responsive column estimate: parent width unknown here; use fixed 3-col chunking and CSS grid inside row
-    for (let i = 0; i < filtered.length; i += 3) out.push(filtered.slice(i, i + 3));
-    void cols;
+    for (let i = 0; i < filtered.length; i += colCount) out.push(filtered.slice(i, i + colCount));
     return out;
-  }, [filtered, isGrid]);
+  }, [filtered, isGrid, colCount]);
 
   const virtual = useVirtualizer({
     count: rows.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => (isGrid ? 190 : 68),
+    estimateSize: () => (isGrid ? GRID_ROW : LIST_ROW),
     overscan: 6,
   });
 
@@ -149,7 +164,7 @@ export default function ChannelGrid(p: Props) {
                   className="pb-3"
                 >
                   {isGrid ? (
-                    <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                    <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}>
                       {row.map((c) => (
                         <Card key={c.uid} c={c} active={c.uid === p.activeUid} fav={p.favorites.includes(c.uid)} onSelect={p.onSelect} onFav={p.onToggleFav} />
                       ))}
@@ -180,7 +195,7 @@ function Card({ c, active, fav, onSelect, onFav }: { c: Channel; active: boolean
       aria-label={`Play ${c.name}`}
       className={`group overflow-hidden rounded-xl border text-left transition-all duration-150 hover:-translate-y-0.5 ${active ? 'border-[#CCFF00] shadow-[0_0_24px_-4px_rgba(204,255,0,0.4)]' : 'border-white/5 bg-[#111113] hover:border-white/15'}`}
     >
-      <div className="relative aspect-video bg-black">
+      <div className="relative h-36 w-full shrink-0 bg-black">
         <Logo ch={c} />
         <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-[#CCFF00] backdrop-blur">{c.kind.toUpperCase()}</span>
         {c.geoBlocked && <span className="absolute right-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] text-zinc-400">GEO</span>}
@@ -188,7 +203,7 @@ function Card({ c, active, fav, onSelect, onFav }: { c: Channel; active: boolean
           <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#CCFF00] text-lg font-bold text-black">▶</span>
         </span>
       </div>
-      <div className="flex items-start gap-2 p-2.5">
+      <div className="flex h-16 items-start gap-2 overflow-hidden p-2.5">
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-semibold text-zinc-100">{c.cleanName}</p>
           <p className="truncate text-[11px] text-zinc-500">{c.group}{c.quality ? ` · ${c.quality}` : ''}</p>
@@ -214,7 +229,7 @@ function Row({ c, active, fav, onSelect, onFav }: { c: Channel; active: boolean;
       onClick={() => onSelect(c)}
       role="option"
       aria-selected={active}
-      className={`flex cursor-pointer items-center gap-3 rounded-xl border p-2 transition ${active ? 'border-[#CCFF00] bg-[#CCFF00]/5' : 'border-white/5 bg-[#111113] hover:border-white/15'}`}
+      className={`flex h-[60px] cursor-pointer items-center gap-3 rounded-xl border p-2 transition ${active ? 'border-[#CCFF00] bg-[#CCFF00]/5' : 'border-white/5 bg-[#111113] hover:border-white/15'}`}
     >
       <div className="h-11 w-16 shrink-0 overflow-hidden rounded-lg bg-black">
         <Logo ch={c} />

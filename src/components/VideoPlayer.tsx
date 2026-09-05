@@ -403,7 +403,8 @@ export default function VideoPlayer(p: Props) {
         </div>
       )}
 
-      {/* bottom controls */}
+      {/* bottom controls (hidden while the error card owns the space) */}
+      {!err && (
       <div className={`absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent p-3 pt-8 transition-opacity ${showControls ? 'opacity-100' : 'pointer-events-none opacity-0'}`}>
         <div className="flex items-center gap-2">
           <button
@@ -433,8 +434,9 @@ export default function VideoPlayer(p: Props) {
               {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
           </div>
+          </div>
         </div>
+      )}
       </div>
-    </div>
   );
 }

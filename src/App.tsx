@@ -241,7 +241,7 @@ export default function App() {
   return (
     <div className="flex h-full flex-col bg-[#050506] text-zinc-100">
       {/* topbar */}
-      <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/5 bg-[#0A0A0B]/90 px-4 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-3 border-b border-white/5 bg-[#0A0A0B]/90 px-4 backdrop-blur-xl">
         <div className="flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#CCFF00] text-xl font-black text-black">◉</span>
           <span className="font-display text-lg tracking-tight">
@@ -254,7 +254,7 @@ export default function App() {
           <select
             value={cfg.activeSourceId ?? ''}
             onChange={(e) => { setCfg((p) => ({ ...p, activeSourceId: e.target.value })); setCurrentUid(null); }}
-            className="ml-2 hidden max-w-52 truncate rounded-lg border border-white/10 bg-[#111113] px-2.5 py-1.5 text-xs text-zinc-300 sm:block"
+            className="ml-2 min-w-0 flex-1 truncate rounded-lg border border-white/10 bg-[#111113] px-2.5 py-1.5 text-xs text-zinc-300 sm:max-w-52 sm:flex-none"
             aria-label="Active source"
           >
             {cfg.sources.map((s) => (
@@ -277,7 +277,7 @@ export default function App() {
       {cfg.sources.length === 0 ? (
         <EmptyState onAdd={() => setShowAdd(true)} />
       ) : (
-        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[260px_minmax(0,1fr)_minmax(380px,460px)]">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 p-4 lg:grid-cols-[220px_minmax(0,1fr)_320px] xl:grid-cols-[260px_minmax(0,1fr)_minmax(380px,460px)]">
           {/* sidebar */}
           <aside className="hidden min-h-0 flex-col gap-4 overflow-auto lg:flex">
             <div className="rounded-2xl border border-white/5 bg-[#0A0A0B] p-3">
@@ -335,7 +335,7 @@ export default function App() {
           </aside>
 
           {/* channel library */}
-          <main className={`min-h-[320px] rounded-2xl border border-white/5 bg-[#0A0A0B] p-3 ${cfg.settings.theater ? 'lg:hidden xl:block' : ''}`}>
+          <main className={`min-h-[320px] rounded-2xl border border-white/5 bg-[#0A0A0B] p-3 max-lg:h-[62vh] lg:min-h-0 ${cfg.settings.theater ? 'lg:hidden xl:block' : ''}`}>
             <ChannelGrid
               channels={channels}
               activeUid={currentUid}
@@ -354,7 +354,7 @@ export default function App() {
           </main>
 
           {/* player */}
-          <section className={`min-h-0 overflow-auto ${cfg.settings.theater ? 'lg:col-span-2 xl:col-span-1' : ''}`}>
+          <section className={`min-h-0 overflow-auto max-lg:order-first ${cfg.settings.theater ? 'lg:col-start-2 lg:col-span-2 xl:col-start-auto xl:col-span-1' : ''}`}>
             <Suspense fallback={<div className="skeleton-shimmer aspect-video w-full rounded-2xl" />}>
               <VideoPlayer
               channel={current}

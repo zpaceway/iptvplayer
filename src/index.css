@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-void-950: #050506;
+  --color-void-900: #0a0a0b;
+  --color-void-850: #111113;
+  --color-void-800: #1a1a1e;
+  --color-void-700: #26262c;
+  --color-volt-DEFAULT: #ccff00;
+  --color-volt-dim: #a8d600;
+  --color-volt-ink: #0a0f00;
+  --color-mist-100: #f4f4f5;
+  --color-mist-400: #a1a1aa;
+  --color-mist-600: #63636b;
+  --color-live: #ff3b5c;
+  --font-display: "Space Grotesk", Inter, system-ui, sans-serif;
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: #050506;
+  color: #f4f4f5;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0a0a0b; }
+::-webkit-scrollbar-thumb { background: #26262c; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a42; }
+
+/* shimmer */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #1a1a1e 25%, #26262c 50%, #1a1a1e 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.2s infinite linear;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.live-dot { animation: pulse-live 1.6s infinite; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.25s ease-out both; }
+
+video::-webkit-media-controls { display: none !important; }
+
+:focus-visible {
+  outline: 2px solid #ccff00;
+  outline-offset: 2px;
+}
